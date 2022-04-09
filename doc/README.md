@@ -4,6 +4,9 @@
 # Simple conversion, Default "mdmt.css" template file is used when found in path
 mdmt --input=tests/README.md --output=tests/README.html
 
+# Same as above but explicitly specify output file type, autodetection is skipped
+mdmt --input=tests/README.md --output=tests/README --type=html
+
 # Use specific template file during conversion
 #     Filename might be absolute or relative to current working path
 mdmt --input=tests/README.md --output=tests/README.html --template=templates/mdmt.css
@@ -13,6 +16,9 @@ mdmt --input=tests/README.md --output=tests/README.html --template=templates/mdm
 ```sh
 # Simple conversion, Default "mdmt.css" template file is used when found in path
 mdmt --input=tests/README.md --output=tests/README.pdf
+
+# Same as above but explicitly specify output file type, autodetection is skipped
+mdmt --input=tests/README.md --output=tests/README --type=pdf
 
 # Use specific template file during conversion
 #     Filename might be absolute or relative to current working path
