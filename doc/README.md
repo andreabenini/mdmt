@@ -1,4 +1,4 @@
-# Usage Examples:
+# User Manual:
 ## MarkDown -> HTML
 ```sh
 # Simple conversion, Default "mdmt.css" template file is used when found in path
@@ -30,7 +30,41 @@ tests/README.md
 tests/SEC-RES-REQ-1.md
 EOT
 
-# Same command with input stream generated from another command on pipe
+# Same command with input stream generated from another command
 ls -1 tests/*.md | \
     mdmt --input-list - --output=tests/README.pdf --template=templates/mdmt.css
+```
+
+## Split by headers
+Split on different files based on selected headings, few notes are necessary to 
+understand how it works:
+- `--output` is **mandatory** and it must be an existing directory. Few examples:
+    - `--output=tests`. Valid if "_tests_" is an existing (and writable) directory
+    - `--output=tests/a.md`. Invalid because it is a file, **but** output files 
+        **will be saved** to `tests` if directory exists and it is writable.
+- Each single generated file will be saved when selected header is found in source,
+    allowed values are `1..6`. This structure will be generated:
+    - `--header-split 1` Files will be saved as "`[nn] [title].md`" in the target
+        directory.  
+        `[nn]` is calculated on the number of sections found in the source file
+        (starting from "0").  
+        `[title]` is the header title name, allowed characters: [a-zA-Z0-9 ]
+    - `--header-split 2..6` Directories with `H1` headers will be created inside
+        `--output` dir. Naming conventions will follow what already described above.
+        Inside each directory a `README.md` file with contents from upper sections
+        will be created and files for selected section will be stored separately
+        with "`[nn] [title].md`" convention previously described. This schema aims
+        to reproduce some sort of "README.md"+Tree structure just like common
+        github repos.
+
+Examples:
+```sh
+# H1 Split
+mdmt --input=tests/README.md --output=tests/ --template=templates/mdmt.css --header-split 1
+
+# H2..n Split
+mdmt --input=tests/README.md --output=tests/ --template=templates/mdmt.css --header-split 2
+mdmt --input=tests/README.md --output=tests/ --template=templates/mdmt.css --header-split 3
+#...
+mdmt --input=tests/README.md --output=tests/ --template=templates/mdmt.css --header-split 6
 ```
