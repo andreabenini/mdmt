@@ -9,7 +9,7 @@ catch() {
 }
 # Tests
 mkdir -p ./tests/output
-if [ $(ls -1 tests|wc -l) -lt 2 ]; then echo "Copy some sample data into './tests'"; exit 1; fi
+if [ $(ls -1 tests|wc -l) -lt 2 ]; then echo "Copy some sample data into './tests' to continue"; exit 1; fi
 echo -e "\n\033[1;34mSTARTING TESTS\033[0;37m"
 
 
