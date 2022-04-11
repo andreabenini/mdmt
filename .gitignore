@@ -4,5 +4,4 @@ __pycache__/
 *$py.class
 
 # local utilities and test files
-*.sh
 tests/
