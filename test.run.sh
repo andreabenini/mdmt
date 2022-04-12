@@ -37,13 +37,15 @@ tests/README.md
 tests/SEC-RES-REQ-1.md
 EOT
 
-echo -e "\033[0;96m- Splitting   README.md by header 1\033[0;90m"
-echo -e "  "./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 1
-./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 1
+echo -e "\033[0;96m- Splitting   test.md by header 1\033[0;90m"
+echo -e "  "./mdmt --input=./tests/test.md --output=./tests/output/split --template=./templates/mdmt.css --header-split 1
+mkdir -p ./tests/output/split
+rm -rf ./tests/output/split/*
+./mdmt --input=./tests/test.md --output=./tests/output/split --template=./templates/mdmt.css --header-split 1
 
-# echo -e "\033[0;96m- Splitting   README.md by header 2\033[0;90m"
-# echo -e "  "./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 2
-# ./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 2
+echo -e "\033[0;96m- Splitting   README.md by header 2\033[0;90m"
+echo -e "  "./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 2
+./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 2
 
 
 echo -e "\n\033[0;32m- - - -   COMPLETED   - - - -\033[0;37m\n"
