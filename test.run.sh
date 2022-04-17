@@ -45,7 +45,7 @@ rm -rf ./tests/output/split/*
 
 echo -e "\033[0;96m- Splitting   README.md by header 2\033[0;90m"
 echo -e "  "./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 2
-./mdmt --input=./tests/README.md --output=./tests/output/ --template=./templates/mdmt.css --header-split 2
+./mdmt --input=./tests/test.md --output=./tests/output/split --template=./templates/mdmt.css --header-split 2
 
 
 echo -e "\n\033[0;32m- - - -   COMPLETED   - - - -\033[0;37m\n"
