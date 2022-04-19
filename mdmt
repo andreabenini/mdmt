@@ -1,0 +1,327 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# MDMT - MarkDown Multi Tool
+#        Convert MD files to something else for easy rendering or printing
+#
+# pyright: reportMissingImports=false
+import re
+import os
+import sys
+import shutil
+import optparse
+import markdown
+
+outputFormats = ['md', 'html', 'pdf']
+pageFormats   = ['A4', 'Letter']
+
+class _mdmtBase:
+    def __init__(self, name=None, utility=None):
+        self._name   = name
+        if utility:
+            self._utility = os.popen(f"which {utility} 2>/dev/null").read().strip()
+            self.__valid   = False if not self._utility else True
+            if not self.isValid:
+                print(f"ERROR: Command line utility '{utility}' not found", file=sys.stderr)
+        else:
+            self.__valid = True
+    def read(self, fileName=None):
+        with open(fileName) as f:
+            return f.read()
+    def write(self, fileName=None, contents=''):
+        try:
+            with open(fileName, 'w') as f:
+                f.write(contents)
+            return True
+        except Exception:
+            return False
+    @property
+    def isValid(self):
+        return self.__valid
+
+class mdmtMD(_mdmtBase):
+    def __init__(self, name=None):
+        super().__init__(name=name, utility=None)
+    def read(self, fileName=None, template=None):
+        try:
+            page = markdown.markdown(
+                    super().read(fileName=fileName),    # Contents
+                    tab_length=2,                       # Options
+                    extensions=['admonition', 'extra', 'legacy_attrs', 'legacy_em', 'meta', 'nl2br', 'sane_lists', 'smarty', 'toc', 'tables', 'wikilinks']  # Plugins
+                    # 'codehilite', // XXX: dealing with code highlight, mermaid and other code blocks
+            )
+            try:
+                super().read(fileName=template)
+                cssTemplate = f"<link rel='stylesheet' href='{template}'>"     # Workaround for wkhtmltopdf bug on relative paths
+            except:
+                print(f"WARNING: Template file '{template}' not found, ignoring CSS formatting")
+                cssTemplate = ''
+            return f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>{self._name}</title>
+    <meta charset="UTF-8">
+    <meta name="generator" content="mdmt">
+    {cssTemplate}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://twemoji.maxcdn.com/2/twemoji.min.js?11.2"></script>    <!-- Rendering UTF-8 emoji -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>    <!-- Mermaid code blocks rendering -->
+    <script>window.onload = function () {{
+        // Emoji rendering
+        twemoji.parse(document.body);
+        // Mermaid rendering
+        mermaid.initialize({{
+            logLevel: "error",      // log errors
+            securityLevel: "loose", // loose security for first-party authored diagrams
+            theme: (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "default" // Respect a preferred dark color scheme, if any
+        }});
+    }}</script>
+</head>
+<body class="markdown-body">
+{page}
+<script>
+    // Loading mermaid language rendering on the fly, even on <pre><code> blocks
+    document.querySelectorAll("pre.mermaid, pre>code.language-mermaid").forEach($el => {{
+        if ($el.tagName === "CODE") $el = $el.parentElement;
+        $el.outerHTML = `<div class="mermaid">${{$el.textContent}}</div>`
+    }});
+</script>
+</body>
+</html>
+"""
+        except Exception:
+            print(f"ERROR: Cannot open '{fileName}'", file=sys.stderr)
+            return None
+
+class mdmtHTML(_mdmtBase):
+    def __init__(self):
+        super().__init__()
+    def write(self, fileName=None, contents=''):
+        if not super().write(fileName=fileName, contents=contents):
+                print(f"ERROR: Cannot write '{fileName}", file=sys.stderr)
+
+class mdmtPDF(_mdmtBase):
+    def __init__(self, name=''):
+        super().__init__(name=name, utility='wkhtmltopdf')
+    def write(self, fileName=None, contents='', page=None):
+        try:
+            tmpFile = fileName+'.tmp.html'        # Dirty hack for local file access bug
+            if super().write(fileName=tmpFile, contents=contents):
+                os.popen(f"{self._utility} --log-level error --enable-local-file-access --page-size '{page}' --encoding 'UTF-8' '--title' '{self._name}' '{tmpFile}' '{fileName}'").read().encode()
+                os.unlink(tmpFile)
+        except Exception as E:
+            print(f"ERROR: Cannot write {fileName}", file=sys.stderr)
+            print(str(E))
+
+
+class mdmt:
+    # Constructors
+    def __init__(self, inputFile=None, outputFile=None, template=None, pageSize=None, header=None):
+        # Input/Output files checking
+        self.__valid = False
+        if not inputFile or not outputFile:
+            print("ERROR: Invalid input/output files", file=sys.stderr)
+            return
+        self.__input  = inputFile
+        self.__inputName = os.path.splitext(os.path.basename(self.__input))[0]
+        self.__output = outputFile
+        # PageSize
+        self.__pageSize = pageSize.capitalize()
+        if self.__pageSize not in pageFormats:
+            print("ERROR: Invalid page size, allowed values: "+','.join(pageFormats), file=sys.stderr)
+            return
+        #
+        self.__header = header              # (int) or (None)
+        self.__valid = True
+        self.__template = template
+
+    def convert(self, fileFormat=None):
+        self.__convertCheck(fileFormat=fileFormat)
+        if not self.isValid:
+            return 1
+        # Reading input file (to [streamBuffer])
+        fileInput = mdmtMD(name=self.__inputName)
+        if not fileInput.isValid:
+            return 1
+        streamBuffer = fileInput.read(fileName=self.__input, template=self.__template)
+        if not streamBuffer:
+            return 1
+        # Writing output file, based on file type
+        if self.__outputExt == 'md':
+            shutil.copyfile(self.__inputName, self.__output)
+        elif self.__outputExt == 'html':
+            fileOutput = mdmtHTML()
+            fileOutput.write(fileName=self.__output, contents=streamBuffer)
+        elif self.__outputExt == 'pdf':
+            fileOutput = mdmtPDF(name=self.__inputName)
+            fileOutput.write(fileName=self.__output, contents=streamBuffer, page=self.__pageSize)
+        else:
+            print(f"ERROR: Extension '{self.__outputExt}' not supported", file=sys.stderr)
+            return 1
+        print(f"Generated file: '{self.__output}'")
+        return 0
+    def __convertCheck(self, fileFormat=None):
+        # Detecting file format
+        if not fileFormat:
+            (_, self.__outputExt) = os.path.splitext(self.__output)
+            self.__outputExt = self.__outputExt[1:]
+        else:
+            self.__outputExt = fileFormat
+        if self.__outputExt not in outputFormats:
+            print("ERROR: Invalid output format", file=sys.stderr)
+            self.__valid = False
+
+    # Write contents to __currentFile. Used by [self.__splitHeaders*() functions]
+    def __write(self, contents=''):
+        try:
+            with open(self.__currentFile, 'a+') as f:
+                f.write(contents)
+            return True
+        except Exception:
+            return False
+
+    # Get unique dir or file name for newly created [__currentFile]
+    def __splitHeadersAddPath(self, dir=None, file=None):
+        path = os.path.sep.join(self.__dirWalk) + os.path.sep
+        if dir:
+            while os.path.isdir(path+dir):
+                dir += '_'
+            os.mkdir(path+dir)
+            path = path + dir + os.path.sep
+            self.__dirWalk += [dir]
+        else:
+            while os.path.isfile(path+file):
+                filename, extension = os.path.splitext(file)
+                file = filename + '_' + extension
+        self.__currentFile = path + file
+
+    # Split markdown input stream into multiple files by using [self.__header]
+    def splitHeaders(self):
+        # Input params checks
+        self.__splitHeadersCheckInput()
+        if not self.isValid:
+            return 1
+        # Reading input stream
+        try:
+            fInput = open(self.__input, 'r')
+            inputLines = fInput.readlines()
+            self.__dirWalk = [self.__output]
+            self.__ignoreParsing = False
+            self.__splitHeadersAddPath(file='README.md')
+            for line in inputLines:
+                self.__splitHeadersDetectHeader(line)
+                self.__write(contents=line)
+            return 0
+        except Exception as E:
+            print(f"ERROR: {E}", file=sys.stderr)
+            return 1
+    # Detect input parameters, used once into [__splitHeadersCheckInput] method only
+    def __splitHeadersCheckInput(self):
+        try:
+            # Header parameter check
+            if not self.__header:
+                raise TypeError('Header parameter required')
+            self.__header = int(self.__header)
+            if self.__header <= 0:
+                raise TypeError('Header must be a positive number')
+            # output destination directory check
+            if not os.path.isdir(self.__output):
+                self.__output = os.path.dirname(self.__output)
+                if not os.path.isdir(self.__output):
+                    raise TypeError(f"'{self.__output}' isn't a valid output directory")
+            return
+        except TypeError as E:
+            print(f"ERROR: {E}", file=sys.stderr)
+        except ValueError:
+            print(f"ERROR: Header must be a positive number ({self.__header})", file=sys.stderr)
+        self.__valid = False
+    # Detect if current line has a valid header in it, used once into [__splitHeadersCheckInput] only
+    def __splitHeadersDetectHeader(self, line):
+        currentLine = line.strip()
+        if currentLine == '':
+            return
+        elif currentLine.startswith('```'):
+            self.__ignoreParsing = not self.__ignoreParsing
+            return
+        if not self.__ignoreParsing:
+            (Level, Title) = self.__splitHeadersGetHeader(currentLine)
+            if Level:
+                if Level == self.__header:
+                    self.__splitHeadersAddPath(file=Title+'.md')
+                else:
+                    while len(self.__dirWalk) > Level:
+                        self.__dirWalk.pop()
+                    self.__splitHeadersAddPath(dir=Title, file='README.md')
+
+    # Get [H] title from input stream [currentLine]
+    # @return (level, title) Current header level detected (<= self.__header)
+    #           Level: None or current header level
+    #           Title: None or properly formated title for file or dir creation (strip special chars)
+    def __splitHeadersGetHeader(self, currentLine):
+        firstWord = currentLine.split()[0]
+        if len(firstWord)>0 and firstWord=='#'*len(firstWord):   # Got an header
+            Level = len(firstWord) if len(firstWord)<=self.__header else None
+            Title = currentLine[currentLine.find(firstWord)+len(firstWord):].strip()
+            Title = re.sub('[^a-zA-Z0-9_\-\. ]', '', Title)
+            return (Level, Title)
+        else:
+            return (None, None)
+
+
+    @classmethod
+    def inputFromStdin(cls, outputFileLocation=None):
+        try:
+            tmpInputFile = f"{outputFileLocation}.tmp.md"
+            fOutput = open(tmpInputFile, "w+")
+            for inputFile in sys.stdin:
+                fInput = open(inputFile.strip(), "r")
+                fOutput.write(fInput.read())
+                fInput.close()
+            fOutput.close()
+            return tmpInputFile
+        except Exception:
+            print("ERROR: Cannot concatenate multiple files", file=sys.stderr)
+            return None
+
+    # Properties
+    @property
+    def isValid(self):
+        return self.__valid
+
+
+## - - - -  MAIN  - - - -  ##
+if __name__ == '__main__':
+    # Input parameters
+    parser = optparse.OptionParser(usage=f"%prog [options]\n       Markdown Management Tool utility\n       Convert markdown files to your favorite format")
+    # parser = optparse.OptionParser()
+    parser.add_option('-i', '--input',        dest='inputFile',  default='',         help='Input file to convert (*.md)')
+    parser.add_option('-l', '--input-list',   dest='inputList',  default=None,       help='Concat *.MD list from stdin as one sigle file')
+    parser.add_option('-o', '--output',       dest='outputFile', default='',         help=f"Destination file name ({','.join(outputFormats)})")
+    parser.add_option('-t', '--type',         dest='outputType', default=None,       help=f"Force output to one of these values: ({','.join(outputFormats)}) autodetected by default")
+    parser.add_option('-p', '--page',         dest='page',       default='A4',       help=f"Page size (when applicable) ({','.join(pageFormats)})")     # A4: Default
+    parser.add_option('-H', '--header-split', dest='header',     default=None,       help=f"Split a markdown by headers")
+    parser.add_option('-T', '--template',     dest='template',   default='mdmt.css', help=f"CSS template to apply, default: mdmt.css")
+    (options, _) = parser.parse_args()
+    if (not options.inputFile and not options.inputList) or not options.outputFile:
+        parser.print_help()
+        sys.exit(1)
+    if options.inputList == '-':
+        inputFile = mdmt.inputFromStdin(outputFileLocation=options.outputFile)
+        if not inputFile:
+            sys.exit(1)
+    else:
+        inputFile = options.inputFile
+    # Object init
+    returnCode = 1
+    if not os.path.isabs(options.template):     # Calculate abs path for template file class
+        templateFile = os.path.abspath(os.getcwd()) + os.path.sep + options.template
+    converter = mdmt(inputFile=inputFile, outputFile=options.outputFile, template=templateFile, pageSize=options.page, header=options.header)
+    if options.header:                          # Split file by headers
+        returnCode = converter.splitHeaders()
+    else:                                       # Standard conversion process
+        returnCode = converter.convert(fileFormat=options.outputType)
+    # Remove temp file, if any
+    if options.inputList == '-':
+        os.unlink(inputFile)
+    #
+    sys.exit(returnCode)
