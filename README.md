@@ -1,7 +1,15 @@
 ![project logo](logo.png)
 # MarkDown Multi Tool _(mdmt)_
+### **Concept**
 This tool deals with markdown files and it's used to convert them to other formats such as
 **PDF** and **HTML** files.  
+- I usually write manuals as MarkDown files, there's no need for a GUI editor even if it helps
+a lot. Printing or rendering MD files outside a proper tool might be a pain. The same goes for
+printing. Fortunately HTML or PDF files doesn't suffer this problem.
+- Want a full blown formatting language with a lot of pro features ? Markdown is not the right
+format for you, and this utility is not needed at all. Pick up TeX (LaTeX, ConTeXt, ...) for
+that, Knuth's work is still awesome even after 50 years. Please stay away from proprietary formats.
+
 # Purpose
 It's still a small utility but it already has achieved its basic tasks such as:
 - No human interaction, used in massive batch processes, just a small task in an automation process.
