@@ -1,13 +1,76 @@
 # `mdmt` changelog
-### v0.1 (22/04)
-_Nothing special but it works_
-#### Features:
+Changelog documentation on various mdmt versions, known issues, inner working and fixes along the way
+&nbsp;  
+&nbsp;  
+&nbsp;  
+
+---
+> ### v0.9.1 (22/04)
+_Usable, all planned features are in place_
+#### New features:
+- Slightly optimized code generation and layout cleanup
+- Better exceptions trapping
+- CSS minor fixes, default layout is mainly oriented to GitHub look and feel
+- Providing more CSS templates for different layouts is not yet a priority but it's possible on
+future releases
+#### Internals:
+- HTML javascript code cleanup. Avoiding to generate static HTML pages with JS code in it, this
+really helps during PDF generation due to the fact the webkit plain rendering is good doesn't handle
+runtime code properly. Emoji is still there as the only exception.
+
+
+> ### v0.9 (22/04)
+_Code cleanup_
+#### New features:
+- Added `--verbose` flag for additional output when needed.
+- mermaid code block support now added, now it's fully supported on HTML and PDF files generation.
+- Major rewrite and some code optimization.
+- Internet access is required during Mermaid blocks generation (if any), there's no need later on.
+#### Internals:
+- Code optimizations are related to a stable and usable mermaid support for PDF and HTML generation.
+- External mermaid service from their CDN is now used when images are generated. Raw HTML pages
+might be rendered on the fly with some JS code but newly added methods _totally avoid_ to inject
+JavaScript code in the build process. This approach fairly and properly render all Mermaid blocks
+equally on PDF and HTML.
+There are a lot of known issues with webkit libs and their Javascript interpreter due to the fact it
+is way less powerful than Google V8 or equivalent engines. Statically generating graphs directly from
+MarkDown code seems to be the best option, GitHub does exactly the same.
+
+
+---
+> ### v0.3 (22/04)
+_PDF proper fixes when used with webkit rendering engine_
+#### New features:
+- Major cleanup for PDF generation, reliable and based on tmp files to avoid webkit known issues
+#### Internals:
+- Fonts and formatting are left on the CSS side, need to fix it properly.
+- webkit rendering is really good but workaround must be placed to fix its errantic behavior when
+local resources are loaded from main page.
+- Basically this is a webkit fix for known issues release.
+
+
+---
+> ### v0.2 (22/04)
+_HTML generation seems to be finally acceptable_
+#### New features:
+- md join from multiple files from stdin
+#### Internals:
+- Syntax fixes, python linter is now happy
+- Focusing on single pages generation multiple file joins are not yet ready for prime time
+- Working on speed and efficiency, no refactoring yet
+- Getting emoji as UTF-8 chars. Somewhat important when importing chat conversations
+
+
+---
+> ### v0.1 (22/04)
+_Nothing special but it works, a rather good RC1_
+#### New features:
 - md -> html
 - md -> pdf
 - md multiple split
 - md join from multiple files
 - using python builtin markdown module and external `wkhtmltopdf` utility
-#### Bugs / Issues:
+#### Internals:
 - barebone test unit in place for multiple tests
 - software is still for personal usage, it just works, no heavy input checks or
     sanity improvements

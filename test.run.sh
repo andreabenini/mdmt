@@ -31,9 +31,9 @@ echo -e "\n\033[1;97mSTARTING TESTS"
 # ./mdmt --input=tests/README.md --output=tests/output/README.2.pdf --template=templates/mdmt.css
 
 echo -e "\033[0;96m- Conversion  test.mermaid.md -> test.mermaid.[html|pdf]  [TEMPLATE]\033[0;90m"
-echo -e "  "./mdmt --input=tests/test.mermaid.md --output=tests/output/test.mermaid.[html\|pdf] --template=templates/mdmt.css
-./mdmt --input=tests/test.mermaid.md --output=tests/output/test.mermaid.html --template=templates/mdmt.css
-./mdmt --input=tests/test.mermaid.md --output=tests/output/test.mermaid.pdf  --template=templates/mdmt.css
+echo -e "  "./mdmt --verbose --input=tests/test.mermaid.md --output=tests/output/test.mermaid.[html\|pdf] --template=templates/mdmt.css
+./mdmt --verbose --input=tests/test.mermaid.md --output=tests/output/test.mermaid.html --template=templates/mdmt.css
+./mdmt --verbose --input=tests/test.mermaid.md --output=tests/output/test.mermaid.pdf  --template=templates/mdmt.css
 
 # echo -e "\033[0;96m- Joining     input-list-> README.3.pdf  [TEMPLATE]\033[0;90m"
 # echo    '  cat << EOT | ./mdmt --input-list - --output=tests/output/README.3.pdf --template=templates/mdmt.css'
