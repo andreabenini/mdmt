@@ -1,4 +1,4 @@
-# User Manual:
+# Examples:
 ## MarkDown -> HTML
 ```sh
 # Simple conversion, Default "mdmt.css" template file is used when found in path

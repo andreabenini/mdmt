@@ -41,5 +41,4 @@ is usually named `wkhtmltox`. MacOS users might download it directly or use _bre
 (`brew install wkhtmltopdf`)
 
 # Usage
-See [doc/README.md](doc/README.md) and keep it as a User's manual or a reference for your needs,
-examples are supplied as well.
+Few live [examples](doc/examples.md) are provided in the user manual as a reference for your needs.
