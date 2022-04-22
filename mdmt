@@ -1,23 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# MDMT - MarkDown Multi Tool
-#        Convert MD files to something else for easy rendering or printing
+# MDMT  -   MarkDown Multi Tool
+#           Convert MD files to something else for easy rendering or printing
+# @author   Ben <Andrea Benini>.  Email on github website for details
+# @see      https://github.com/andreabenini/mdmt
+# @version  v0.9.1
+# @license  GPLv3
+#
+# @see      See URL for details, documentation, issues, changelog
 #
 # pyright: reportMissingImports=false
 import re
 import os
 import sys
+import base64
 import shutil
 import optparse
 import markdown
+import requests
 
 outputFormats = ['md', 'html', 'pdf']
 pageFormats   = ['A4', 'Letter']
 
 class _mdmtBase:
-    def __init__(self, name=None, utility=None):
+    def __init__(self, name=None, utility=None, verbose=False):
         self._name   = name
+        self.__verbose = verbose
         if utility:
             self._utility = os.popen(f"which {utility} 2>/dev/null").read().strip()
             self.__valid   = False if not self._utility else True
@@ -38,18 +47,48 @@ class _mdmtBase:
     @property
     def isValid(self):
         return self.__valid
+    @property
+    def verbose(self):
+        return self.__verbose
+
+
 
 class mdmtMD(_mdmtBase):
-    def __init__(self, name=None):
-        super().__init__(name=name, utility=None)
+    def __init__(self, name=None, verbose=False):
+        super().__init__(name=name, utility=None, verbose=verbose)
+
+    # Convert Mermaid graphs to scalable vector graphics for easy rendering
+    def mermaid2SVG(self, matchObj):
+        if matchObj and matchObj.group(2):  # .group(2)=MermaidGraph
+            if self.verbose:
+                print('- Mermaid block code found. Using online service for static rendering')
+            mermaidGraph = matchObj.group(2)
+            matchEncoded = mermaidGraph.encode("ascii")
+            base64Bytes  = base64.b64encode(matchEncoded)
+            base64String = base64Bytes.decode("ascii")    # Here is
+            request = requests.get('https://mermaid.ink/svg/'+base64String)
+            if request.status_code in range(200, 299):
+                return str(request.content, encoding='UTF-8')+"\n"
+        if self.verbose:
+            print('- Mermaid block code found. Malformed markdown block (regexp error)')
+        return "[[ E R R O R ]]"
+
+    # Markdown preprocessor method
+    def __preprocessor(self, fileName=None):
+        streamBuffer = super().read(fileName=fileName)
+        # Mermaid preprocessor, convert diagrams into SVG before rendering
+        regex = r"(?s)(?P<MermaidHeader>^```mermaid$\n)(?P<MermaidGraph>.*?)(?P<MermaidFooteer>^```$\n?)"
+        streamBuffer = re.sub(regex, self.mermaid2SVG, streamBuffer, 0, re.MULTILINE)
+        #
+        return streamBuffer
+
     def read(self, fileName=None, template=None):
         try:
             page = markdown.markdown(
-                    super().read(fileName=fileName),    # Contents
-                    tab_length=2,                       # Options
+                    self.__preprocessor(fileName=fileName),     # Contents
+                    tab_length=2,                               # Options
                     extensions=['admonition', 'extra', 'legacy_attrs', 'legacy_em', 'meta', 'nl2br', 'sane_lists', 'smarty', 'toc', 'tables', 'wikilinks']  # Plugins
-                    # 'codehilite', // XXX: dealing with code highlight, mermaid and other code blocks
-            )
+            )                   # codehilite avoided, might cause errors on CSS rendering
             try:
                 super().read(fileName=template)
                 cssTemplate = f"<link rel='stylesheet' href='{template}'>"     # Workaround for wkhtmltopdf bug on relative paths
@@ -64,28 +103,11 @@ class mdmtMD(_mdmtBase):
     <meta name="generator" content="mdmt">
     {cssTemplate}
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <script src="https://twemoji.maxcdn.com/2/twemoji.min.js?11.2"></script>    <!-- Rendering UTF-8 emoji -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>    <!-- Mermaid code blocks rendering -->
-    <script>window.onload = function () {{
-        // Emoji rendering
-        twemoji.parse(document.body);
-        // Mermaid rendering
-        mermaid.initialize({{
-            logLevel: "error",      // log errors
-            securityLevel: "loose", // loose security for first-party authored diagrams
-            theme: (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "default" // Respect a preferred dark color scheme, if any
-        }});
-    }}</script>
+    <script src="https://twemoji.maxcdn.com/2/twemoji.min.js?11.2"></script>        <!-- Rendering UTF-8 emoji -->
+    <script>window.onload=function() {{ twemoji.parse(document.body); }}</script>     <!-- Emoji rendering -->
 </head>
 <body class="markdown-body">
 {page}
-<script>
-    // Loading mermaid language rendering on the fly, even on <pre><code> blocks
-    document.querySelectorAll("pre.mermaid, pre>code.language-mermaid").forEach($el => {{
-        if ($el.tagName === "CODE") $el = $el.parentElement;
-        $el.outerHTML = `<div class="mermaid">${{$el.textContent}}</div>`
-    }});
-</script>
 </body>
 </html>
 """
@@ -94,15 +116,15 @@ class mdmtMD(_mdmtBase):
             return None
 
 class mdmtHTML(_mdmtBase):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, verbose=False):
+        super().__init__(verbose=verbose)
     def write(self, fileName=None, contents=''):
         if not super().write(fileName=fileName, contents=contents):
                 print(f"ERROR: Cannot write '{fileName}", file=sys.stderr)
 
 class mdmtPDF(_mdmtBase):
-    def __init__(self, name=''):
-        super().__init__(name=name, utility='wkhtmltopdf')
+    def __init__(self, name='', verbose=False):
+        super().__init__(name=name, utility='wkhtmltopdf', verbose=verbose)
     def write(self, fileName=None, contents='', page=None):
         try:
             tmpFile = fileName+'.tmp.html'        # Dirty hack for local file access bug
@@ -113,11 +135,11 @@ class mdmtPDF(_mdmtBase):
             print(f"ERROR: Cannot write {fileName}", file=sys.stderr)
             print(str(E))
 
-
 class mdmt:
     # Constructors
-    def __init__(self, inputFile=None, outputFile=None, template=None, pageSize=None, header=None):
+    def __init__(self, inputFile=None, outputFile=None, template=None, pageSize=None, header=None, verbose=False):
         # Input/Output files checking
+        self.__verbose = verbose
         self.__valid = False
         if not inputFile or not outputFile:
             print("ERROR: Invalid input/output files", file=sys.stderr)
@@ -140,7 +162,7 @@ class mdmt:
         if not self.isValid:
             return 1
         # Reading input file (to [streamBuffer])
-        fileInput = mdmtMD(name=self.__inputName)
+        fileInput = mdmtMD(name=self.__inputName, verbose=self.__verbose)
         if not fileInput.isValid:
             return 1
         streamBuffer = fileInput.read(fileName=self.__input, template=self.__template)
@@ -150,10 +172,10 @@ class mdmt:
         if self.__outputExt == 'md':
             shutil.copyfile(self.__inputName, self.__output)
         elif self.__outputExt == 'html':
-            fileOutput = mdmtHTML()
+            fileOutput = mdmtHTML(verbose=self.__verbose)
             fileOutput.write(fileName=self.__output, contents=streamBuffer)
         elif self.__outputExt == 'pdf':
-            fileOutput = mdmtPDF(name=self.__inputName)
+            fileOutput = mdmtPDF(name=self.__inputName, verbose=self.__verbose)
             fileOutput.write(fileName=self.__output, contents=streamBuffer, page=self.__pageSize)
         else:
             print(f"ERROR: Extension '{self.__outputExt}' not supported", file=sys.stderr)
@@ -294,6 +316,7 @@ if __name__ == '__main__':
     # Input parameters
     parser = optparse.OptionParser(usage=f"%prog [options]\n       Markdown Management Tool utility\n       Convert markdown files to your favorite format")
     # parser = optparse.OptionParser()
+    parser.add_option('-v', '--verbose',      dest='verbose',    default=False,      help='Verbose output information', action='store_true')
     parser.add_option('-i', '--input',        dest='inputFile',  default='',         help='Input file to convert (*.md)')
     parser.add_option('-l', '--input-list',   dest='inputList',  default=None,       help='Concat *.MD list from stdin as one sigle file')
     parser.add_option('-o', '--output',       dest='outputFile', default='',         help=f"Destination file name ({','.join(outputFormats)})")
@@ -315,7 +338,7 @@ if __name__ == '__main__':
     returnCode = 1
     if not os.path.isabs(options.template):     # Calculate abs path for template file class
         templateFile = os.path.abspath(os.getcwd()) + os.path.sep + options.template
-    converter = mdmt(inputFile=inputFile, outputFile=options.outputFile, template=templateFile, pageSize=options.page, header=options.header)
+    converter = mdmt(verbose=options.verbose, inputFile=inputFile, outputFile=options.outputFile, template=templateFile, pageSize=options.page, header=options.header)
     if options.header:                          # Split file by headers
         returnCode = converter.splitHeaders()
     else:                                       # Standard conversion process
