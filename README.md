@@ -1,8 +1,9 @@
 ![project logo](logo.png)
 # MarkDown Multi Tool _(mdmt)_
-### **Concept**
+#### **Concept**
 This tool deals with markdown files and it's used to convert them to other formats such as
 **PDF** and **HTML** files.  
+
 - I usually write manuals as MarkDown files, there's no need for a GUI editor even if it helps
 a lot. Printing or rendering MD files outside a proper tool might be a pain. Fortunately HTML
 or PDF files doesn't suffer this problem.
@@ -10,8 +11,9 @@ or PDF files doesn't suffer this problem.
 format for you, and this utility is not needed at all. Pick up TeX (LaTeX, ConTeXt, ...) for
 that, Knuth's work is still awesome even after 50 years. Please stay away from proprietary formats.
 
-# Purpose
+## Purpose
 It's still a small utility but it already has achieved its basic tasks such as:
+
 - No human interaction, used in massive batch processes, just a small task in an automation process.
 - Lightweight and highly portable. Even if pandoc is a massive tool and has plenty of features (and
 I like it) it also has a lot of dependencies, having a full blown Haskell environment installed 
@@ -32,7 +34,7 @@ pages layout, I've barely taken formatting from there because that's what I use 
 personally prefer. It's totally up to you to create your own CSS layout and define page rendering
 according to your needs, dark layouts and so on.
 
-# Requirements
+## Requirements
 - **_python3_**. This is a python utility, basic libs supplied are fine, there's no need to install
 additional things
 - **_wkhtmltopdf_**. Webkit command line renderer. It uses the webkit engine from the command line,
@@ -40,5 +42,30 @@ if you already have any major linux desktop environment you should already have 
 is usually named `wkhtmltox`. MacOS users might download it directly or use _brew_ for that
 (`brew install wkhtmltopdf`)
 
+<!--DISCLAIMER-->
+
 # Usage
-Few live [examples](doc/examples.md) are provided in the user manual as a reference for your needs.
+```sh
+$ ./mdmt --help
+Usage: mdmt [options]
+       Markdown Management Tool utility
+       Convert markdown files to your favorite format
+
+Options:
+  -h, --help            show this help message and exit
+  -v, --verbose         Verbose output information
+  -i INPUTFILE, --input=INPUTFILE
+                        Input file to convert (*.md)
+  -l INPUTLIST, --input-list=INPUTLIST
+                        Concat *.MD list from stdin as one sigle file
+  -o OUTPUTFILE, --output=OUTPUTFILE
+                        Destination file name (md,html,pdf)
+  -t OUTPUTTYPE, --type=OUTPUTTYPE
+                        Force output to one of these values: (md,html,pdf)
+                        autodetected by default
+  -p PAGE, --page=PAGE  Page size (when applicable) (A4,Letter)
+  -H HEADER, --header-split=HEADER
+                        Split a markdown by headers
+  -T TEMPLATE, --template=TEMPLATE
+                        CSS template to apply, default: mdmt.css
+```

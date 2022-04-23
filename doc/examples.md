@@ -44,6 +44,7 @@ ls -1 tests/*.md | \
 ## Split by headers
 Split on different files based on selected headings, few notes are necessary to 
 understand how it works:
+
 - `--output` is **mandatory** and it must be an existing directory. Few examples:
     - `--output=tests`. Valid if "_tests_" is an existing (and writable) directory
     - `--output=tests/a.md`. Invalid because it is a file, **but** output files 
