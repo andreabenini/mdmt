@@ -385,6 +385,7 @@
 
 .markdown-body p {
   margin-top: 0;
+  text-align: justify;
   margin-bottom: 10px;
 }
 

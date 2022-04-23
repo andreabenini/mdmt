@@ -1,10 +1,38 @@
-# `mdmt` changelog
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+## Changelog
 Changelog documentation on various mdmt versions, known issues, inner working and fixes along the way
-&nbsp;  
-&nbsp;  
 &nbsp;  
 
 ---
+> ### v0.9.2 (22/04)
+_minor layout cleanup and document formatting_
+#### New Features:
+- `text-align:justify` is now the default text alignment on standard (and still only) CSS theme.
+- plugin **nl2br** is not pleasant on HTML page rendering, CSS `text-align:justify` has been elected
+as default page justification on all text. Layout is more appealing even if rendered text is not
+exactly like the markdown (but markdown does not have text justification at all).
+- Added a new script to automatically generate a complete user manual for this project, **HTML** and
+**PDF** files are now created by `mdmt` itself !
+- User manuals available as HTML or PDF in the `doc/` directory.
+- `README.md` gets automatically updated from the document generation script.
+- ***md*** and ***html*** files are now both supported as `--input` parameter but **html -> md**
+conversion is still not yet implemented.
+#### Internals:
+- Minor error checking added to improve script reliability.
+- Input and output files are checked before dealing with them
+
+
 > ### v0.9.1 (22/04)
 _Usable, all planned features are in place_
 #### New features:
