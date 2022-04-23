@@ -15,10 +15,16 @@ trap 'catch $? $LINENO' ERR
 catch() {
     echo "ERROR: $1. Line: $2"
 }
+cleanup() {
+    mkdir -p ./tests/output
+    rm -rf ./tests/output/*
+    if [ $(ls -1 tests|wc -l) -lt 2 ]; then echo "Copy some sample data into './tests' to continue"; exit 1; fi
+}
+cleanup
+if [ "$1" != "" ]; then
+    exit 1
+fi
 # Tests
-mkdir -p ./tests/output
-rm -rf ./tests/output/*
-if [ $(ls -1 tests|wc -l) -lt 2 ]; then echo "Copy some sample data into './tests' to continue"; exit 1; fi
 echo -e "\n\033[1;97mSTARTING TESTS"
 
 
@@ -42,6 +48,10 @@ echo -e "\033[0;96m- Conversion  test.mermaid.md -> test.mermaid.[html|pdf]  [TE
 echo -e "  "./mdmt --verbose --input=tests/test.mermaid.md --output=tests/output/test.mermaid.[html\|pdf] --template=templates/mdmt.css
 ./mdmt --verbose --input=tests/test.mermaid.md --output=tests/output/test.mermaid.html --template=templates/mdmt.css
 ./mdmt --verbose --input=tests/test.mermaid.md --output=tests/output/test.mermaid.pdf  --template=templates/mdmt.css
+
+echo -e "\033[0;96m- Conversion  output/test.mermaid.html -> test.mermaid.html.pdf \033[0;90m"
+echo -e "  "./mdmt --verbose --input=tests/output/test.mermaid.html --output=tests/output/test.mermaid.html.pdf
+./mdmt --verbose --input=tests/output/test.mermaid.html --output=tests/output/test.mermaid.html.pdf
 
 echo -e "\033[0;96m- Joining     input-list-> README.3.pdf  [TEMPLATE]\033[0;90m"
 echo    '  cat << EOT | ./mdmt --input-list - --output=tests/output/README.3.pdf --template=templates/mdmt.css'
