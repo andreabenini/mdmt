@@ -5,7 +5,7 @@
 #           Convert MD files to something else for easy rendering or printing
 # @author   Ben <Andrea Benini>.  Email on github website for details
 # @see      https://github.com/andreabenini/mdmt
-# @version  v0.9.2
+# @version  v1.0.0
 # @license  GPLv3
 #
 # @see      See URL for details, documentation, issues, changelog
@@ -17,11 +17,14 @@ import sys
 import base64
 import shutil
 import optparse
+from click import option
 import markdown
 import requests
 
-fileFormats = ['md', 'htm', 'html', 'pdf']
 pageFormats = ['A4', 'Letter']
+fileFormats = ['md', 'htm', 'html', 'pdf']
+md_plugins  = ['admonition', 'extra', 'legacy_attrs', 'legacy_em', 'meta', 'sane_lists', 'smarty', 'toc', 'tables', 'wikilinks']  # default plugins
+
 
 class _mdmtBase:
     def __init__(self, name=None, utility=None, verbose=False):
@@ -80,17 +83,11 @@ class mdmtMD(_mdmtBase):
         #
         return streamBuffer
 
-    def read(self, fileName=None, template=None):
-        try:
-            page = markdown.markdown(
-                    self.__preprocessor(fileName=fileName),     # Contents
-                    tab_length=2,                               # Options
-                    extensions=['admonition', 'extra', 'legacy_attrs', 'legacy_em', 'meta', 'sane_lists', 'smarty', 'toc', 'tables', 'wikilinks']  # Plugins
-                                # 'nl2br'       text-align: justify is more pleasant on rendering
-                                # 'codehilite' avoided, might cause errors on CSS rendering
-            )
+    def read(self, fileName=None, plugins=[], template=None):
+        try:                         # Contents                              # Options     # Plugins
+            page = markdown.markdown(self.__preprocessor(fileName=fileName), tab_length=2, extensions=plugins)
             if self.readRaw(fileName=template):
-                cssTemplate = f"<link rel='stylesheet' href='{template}'>"     # Workaround for wkhtmltopdf bug on relative paths
+                cssTemplate = f"<link rel='stylesheet' href='{template}'>"   # Workaround for wkhtmltopdf bug on relative paths
             else:
                 print(f"WARNING: Template file '{template}' not found, ignoring CSS formatting")
                 cssTemplate = ''
@@ -141,7 +138,7 @@ class mdmtPDF(_mdmtBase):
 
 class mdmt:
     # Constructors
-    def __init__(self, inputFile=None, outputFile=None, template=None, pageSize=None, header=None, verbose=False):
+    def __init__(self, inputFile=None, outputFile=None, template=None, pageSize=None, header=None, verbose=False, plugins=None):
         # Input/Output files checking
         self.__verbose = verbose
         self.__valid = False
@@ -157,7 +154,11 @@ class mdmt:
         if self.__pageSize not in pageFormats:
             print("ERROR: Invalid page size, allowed values: "+','.join(pageFormats), file=sys.stderr)
             return
-        #
+        # Set loaded markdown plugins
+        if plugins is not None:
+            self.__plugins = plugins.split(',')
+        else:
+            self.__plugins = md_plugins
         self.__header = header              # (int) or (None)
         self.__valid = True
         self.__template = template
@@ -171,7 +172,7 @@ class mdmt:
         if not fileInput.isValid:
             return 1
         if self.__inputExt == 'md':     # markdown
-            streamBuffer = fileInput.read(fileName=self.__input, template=self.__template)
+            streamBuffer = fileInput.read(fileName=self.__input, template=self.__template, plugins=self.__plugins)
         else:                           # .html .htm
             streamBuffer = fileInput.readRaw(fileName=self.__input)
         if not streamBuffer:
@@ -311,6 +312,30 @@ class mdmt:
         else:
             return (None, None)
 
+    @classmethod
+    def pluginsHelp(cls):
+        print(f"Usage: {os.path.basename(sys.argv[0])} --plugins-help")
+        print(f"       Help on program plugins used for markdown formatting")
+        print(f"       Full details, examples and usable plugins on:")
+        print(f"                 https://python-markdown.github.io/extensions/\n")
+        print(f"       {os.path.basename(sys.argv[0])} --plugins [plugin list]")
+        print(f"       Specify the plugin list that will be used to deal with MarkDown files.")
+        print(f"       When not specified this default list is used: ")
+        print(f"           '{','.join(md_plugins)}'\n")
+        print("Plugins:")
+        print("    admonition   Add rST admonitions to markdown documents")
+        print("    extra        Compilation of plugins that imitates PHP markdown extra")
+        print("    legacy_attrs Set attribute setting syntax on text or code blocks")
+        print("    legacy_em    Keep behavior for emphasis and strong syntax on underscores")
+        print("    meta         Add syntax for meta-data on a document, use multimarkdown syntax")
+        print("    sane_lists   Handle the <list> syntax in order to be less cumbersome")
+        print("    smarty       Convert special chars to HTML entities equivalents")
+        print("    toc          Generate table of contents (TOC) from a markdown document")
+        print("    tables       Create tables in markdown documents")
+        print("    wikilinks    Add support for WikiLinks and convert them to hyperlinks")
+        print("    nl2br        Newlines will be treated as hard breaks (like github flavor)")
+        print("    codehilite   Syntax highlighting to markdown code blocks with Pygments")
+        sys.exit(1)
 
     @classmethod
     def inputFromStdin(cls, outputFileLocation=None):
@@ -338,15 +363,19 @@ if __name__ == '__main__':
     # Input parameters
     parser = optparse.OptionParser(usage=f"%prog [options]\n       Markdown Management Tool utility\n       Convert markdown files to your favorite format")
     # parser = optparse.OptionParser()
-    parser.add_option('-v', '--verbose',      dest='verbose',    default=False,      help='Verbose output information', action='store_true')
-    parser.add_option('-i', '--input',        dest='inputFile',  default='',         help='Input file to convert (*.md)')
-    parser.add_option('-l', '--input-list',   dest='inputList',  default=None,       help='Concat *.MD list from stdin as one sigle file')
-    parser.add_option('-o', '--output',       dest='outputFile', default='',         help=f"Destination file name ({','.join(fileFormats)})")
-    parser.add_option('-t', '--type',         dest='outputType', default=None,       help=f"Force output to one of these values: ({','.join(fileFormats)}) autodetected by default")
-    parser.add_option('-p', '--page',         dest='page',       default='A4',       help=f"Page size (when applicable) ({','.join(pageFormats)})")     # A4: Default
-    parser.add_option('-H', '--header-split', dest='header',     default=None,       help=f"Split a markdown by headers")
-    parser.add_option('-T', '--template',     dest='template',   default='mdmt.css', help=f"CSS template to apply, default: mdmt.css")
+    parser.add_option('-v', '--verbose',      dest='verbose',       default=False,      help='Verbose output information', action='store_true')
+    parser.add_option('-i', '--input',        dest='inputFile',     default='',         help='Input file to convert (*.md)')
+    parser.add_option('-l', '--input-list',   dest='inputList',     default=None,       help='Concat *.MD list from stdin as one sigle file')
+    parser.add_option('-o', '--output',       dest='outputFile',    default='',         help=f"Destination file name ({','.join(fileFormats)})")
+    parser.add_option('-t', '--type',         dest='outputType',    default=None,       help=f"Force output to one of these values: ({','.join(fileFormats)}) autodetected by default")
+    parser.add_option('-p', '--page',         dest='page',          default='A4',       help=f"Page size (when applicable) ({','.join(pageFormats)})")     # A4: Default
+    parser.add_option('-T', '--template',     dest='template',      default='mdmt.css', help=f"CSS template to apply, default: mdmt.css")
+    parser.add_option('-P', '--plugins',      dest='plugins',       default=None,       help=f"Specify plugins to use on markdown formatting")
+    parser.add_option('-I', '--plugins-help', dest='pluginshelp',   default=False,       help=f"Complete help on plugins and their usage", action='store_true')
+    parser.add_option('-H', '--header-split', dest='header',        default=None,       help=f"Split a markdown by headers")
     (options, _) = parser.parse_args()
+    if options.pluginshelp:
+        mdmt.pluginsHelp()
     if (not options.inputFile and not options.inputList) or not options.outputFile:
         parser.print_help()
         sys.exit(1)
@@ -360,7 +389,8 @@ if __name__ == '__main__':
     returnCode = 1
     if not os.path.isabs(options.template):     # Calculate abs path for template file class
         templateFile = os.path.abspath(os.getcwd()) + os.path.sep + options.template
-    converter = mdmt(verbose=options.verbose, inputFile=inputFile, outputFile=options.outputFile, template=templateFile, pageSize=options.page, header=options.header)
+    converter = mdmt(verbose=options.verbose, inputFile=inputFile, outputFile=options.outputFile, 
+                     template=templateFile, pageSize=options.page, header=options.header, plugins=options.plugins)
     if options.header:                          # Split file by headers
         returnCode = converter.splitHeaders()
     else:                                       # Standard conversion process
