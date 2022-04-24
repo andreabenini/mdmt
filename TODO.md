@@ -1,4 +1,10 @@
-## Project TODOs
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+
+# Project TODOs
 This is not a never finished project, something has to work and something else will be added
 on upcoming releases (maybe). Here are planned features, wishlists, requirements and improvements.
 Some of them might see the light in upcoming releases, few will remain here for some time. Feel
