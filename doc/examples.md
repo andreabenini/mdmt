@@ -25,6 +25,12 @@ mdmt --input=tests/README.md --output=tests/README --type=pdf
 mdmt --input=tests/README.md --output=tests/README.pdf --template=templates/mdmt.css
 ```
 
+## HTML -> PDF
+```sh
+# Convert HTML file to a PDF file, templates are not used
+./mdmt --verbose --input=tests/index.html --output=tests/output/index.pdf
+```
+
 ## Concatenate MarkDown -> PDF
 ```sh
 # - Concatenate a bunch of separate markdown files into one single stream

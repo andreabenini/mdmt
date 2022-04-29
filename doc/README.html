@@ -24,6 +24,7 @@
 <li><a href="#examples">Examples:</a><ul>
 <li><a href="#markdown-html">MarkDown -&gt; HTML</a></li>
 <li><a href="#markdown-pdf">MarkDown -&gt; PDF</a></li>
+<li><a href="#html-pdf">HTML -&gt; PDF</a></li>
 <li><a href="#concatenate-markdown-pdf">Concatenate MarkDown -&gt; PDF</a></li>
 <li><a href="#split-by-headers">Split by headers</a></li>
 </ul>
@@ -141,6 +142,10 @@ mdmt --input=tests/README.md --output=tests/README --type=pdf
 # Use specific template file during conversion
 #     Filename might be absolute or relative to current working path
 mdmt --input=tests/README.md --output=tests/README.pdf --template=templates/mdmt.css
+</code></pre>
+<h2 id="html-pdf">HTML -&gt; PDF</h2>
+<pre><code class="language-sh"># Convert HTML file to a PDF file, templates are not used
+./mdmt --verbose --input=tests/index.html --output=tests/output/index.pdf
 </code></pre>
 <h2 id="concatenate-markdown-pdf">Concatenate MarkDown -&gt; PDF</h2>
 <pre><code class="language-sh"># - Concatenate a bunch of separate markdown files into one single stream
