@@ -138,16 +138,17 @@ class mdmtPDF(_mdmtBase):
 
 class mdmt:
     # Constructors
-    def __init__(self, inputFile=None, outputFile=None, template=None, pageSize=None, header=None, verbose=False, plugins=None):
+    def __init__(self, inputFile=None, inputType=None, outputFile=None, template=None, pageSize=None, header=None, verbose=False, plugins=None):
         # Input/Output files checking
         self.__verbose = verbose
         self.__valid = False
         if not inputFile or not outputFile:
             print("ERROR: Invalid input/output files", file=sys.stderr)
             return
+        # [__input], [__inputName], [__inputExt]
         self.__input  = inputFile
         (self.__inputName, self.__inputExt) = os.path.splitext(os.path.basename(self.__input))
-        self.__inputExt = self.__inputExt[1:]
+        self.__inputExt = inputType if inputType else self.__inputExt[1:]   # Force input extension, if available as input parameter
         self.__output = outputFile
         # PageSize
         self.__pageSize = pageSize.capitalize()
@@ -171,10 +172,14 @@ class mdmt:
         fileInput = mdmtMD(name=self.__inputName, verbose=self.__verbose)
         if not fileInput.isValid:
             return 1
-        if self.__inputExt == 'md':     # markdown
+        # Detecting input file format
+        if self.__inputExt == 'md':                                     # markdown
             streamBuffer = fileInput.read(fileName=self.__input, template=self.__template, plugins=self.__plugins)
-        else:                           # .html .htm
+        elif self.__inputExt == 'html' or self.__inputExt == 'htm':     # .html .htm
             streamBuffer = fileInput.readRaw(fileName=self.__input)
+        else:
+            print(f"ERROR: Input file extension '{self.__inputExt}' not supported", file=sys.stderr)
+            return 1
         if not streamBuffer:
             return 1
         # Writing output file, based on file type
@@ -367,7 +372,8 @@ if __name__ == '__main__':
     parser.add_option('-i', '--input',        dest='inputFile',     default='',         help='Input file to convert (*.md)')
     parser.add_option('-l', '--input-list',   dest='inputList',     default=None,       help='Concat *.MD list from stdin as one sigle file')
     parser.add_option('-o', '--output',       dest='outputFile',    default='',         help=f"Destination file name ({','.join(fileFormats)})")
-    parser.add_option('-t', '--type',         dest='outputType',    default=None,       help=f"Force output to one of these values: ({','.join(fileFormats)}) autodetected by default")
+    parser.add_option('-s', '--typein',       dest='inputType',     default=None,       help=f"Force input to one of these values: ({','.join(fileFormats)}) autodetected by default")
+    parser.add_option('-t', '--typeout',      dest='outputType',    default=None,       help=f"Force output to one of these values: ({','.join(fileFormats)}) autodetected by default")
     parser.add_option('-p', '--page',         dest='page',          default='A4',       help=f"Page size (when applicable) ({','.join(pageFormats)})")     # A4: Default
     parser.add_option('-T', '--template',     dest='template',      default='mdmt.css', help=f"CSS template to apply, default: mdmt.css")
     parser.add_option('-P', '--plugins',      dest='plugins',       default=None,       help=f"Specify plugins to use on markdown formatting")
@@ -389,8 +395,8 @@ if __name__ == '__main__':
     returnCode = 1
     if not os.path.isabs(options.template):     # Calculate abs path for template file class
         templateFile = os.path.abspath(os.getcwd()) + os.path.sep + options.template
-    converter = mdmt(verbose=options.verbose, inputFile=inputFile, outputFile=options.outputFile, 
-                     template=templateFile, pageSize=options.page, header=options.header, plugins=options.plugins)
+    converter = mdmt(verbose=options.verbose, template=templateFile, pageSize=options.page, header=options.header, plugins=options.plugins,
+                     inputFile=inputFile, inputType=options.inputType, outputFile=options.outputFile)
     if options.header:                          # Split file by headers
         returnCode = converter.splitHeaders()
     else:                                       # Standard conversion process

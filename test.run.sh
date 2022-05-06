@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Bash test unit
-# @see      Yeah, I'm one of those folks that build test units all day, even for batch utilities :)
+# @see      Yeah, I'm one of those junkies that builds test units all day, even for batch utilities :)
 #
 # @author   Ben <Andrea Benini>.  Email on github website for details
 # @see      https://github.com/andreabenini/mdmt
@@ -9,7 +9,7 @@
 #             place your files into the test dir and you're ready to go
 #
 
-# Exit when a command fails
+# Exit even if just a single command fails
 set -e
 trap 'catch $? $LINENO' ERR
 catch() {
@@ -28,6 +28,7 @@ fi
 echo -e "\n\033[1;97mSTARTING TESTS"
 
 
+
 echo -e "\033[0;96m- Conversion  README.md -> README.1.html\033[0;90m"
 echo -e "  "./mdmt --input=tests/README.md --output=tests/output/README.1.html
 ./mdmt --input=tests/README.md --output=tests/output/README.1.html |grep -v WARNING
@@ -39,6 +40,16 @@ echo -e "  "./mdmt --input=tests/README.md --output=tests/output/README.2.html -
 echo -e "\033[0;96m- Conversion  README.md -> README.1.pdf\033[0;90m"
 echo -e "  "./mdmt --input=tests/README.md --output=tests/output/README.1.pdf
 ./mdmt --input=tests/README.md --output=tests/output/README.1.pdf |grep -v WARNING
+
+echo -e "\033[0;96m- Conversion  README    -> README.4.pdf   (force input to MD)\033[0;90m"
+echo -e "  "./mdmt --input=tests/README --typein=md --output=tests/output/README.4.pdf
+cp tests/README.md tests/README
+./mdmt --input=tests/README.md --output=tests/output/README.4.pdf |grep -v WARNING
+rm -f tests/README
+
+echo -e "\033[0;96m- Conversion  README.md -> README.5       (force output to PDF)\033[0;90m"
+echo -e "  "./mdmt --input=tests/README.md --output=tests/output/README.5 --typeout=pdf
+./mdmt --input=tests/README.md --output=tests/output/README.5 --typeout=pdf |grep -v WARNING
 
 echo -e "\033[0;96m- Conversion  README.md -> README.2.pdf  [TEMPLATE]\033[0;90m"
 echo -e "  "./mdmt --input=tests/README.md --output=tests/output/README.2.pdf --template=templates/mdmt.css
@@ -71,6 +82,7 @@ echo -e "  "./mdmt --input=./tests/test.md --output=./tests/output/split2 --temp
 rm -rf ./tests/output/split2
 mkdir -p ./tests/output/split2
 ./mdmt --input=./tests/test.md --output=./tests/output/split2 --template=./templates/mdmt.css --header-split 2
+
 
 
 echo -e "\n\033[0;32m- - - -   COMPLETED   - - - -\033[0;37m\n"

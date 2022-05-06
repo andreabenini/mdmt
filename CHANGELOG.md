@@ -17,6 +17,15 @@ Changelog documentation on various mdmt versions, known issues, inner working an
 
 
 ---
+> **v1.0.1 (22/05)**  
+_Feature release, parameters for forcing input/output extension files_
+
+- **New features:**
+    - `--typein`, `--typeout` options to avoid in/out file types detections
+- **Internals:**
+    - Test unit sample commands for `--typein`, `--typeout`.
+
+
 > **v1.0.0 (22/05)**  
 _Stable release, runtime custom formatting plugins available_
 
