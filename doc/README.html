@@ -108,7 +108,10 @@ Options:
                         Concat *.MD list from stdin as one sigle file
   -o OUTPUTFILE, --output=OUTPUTFILE
                         Destination file name (md,htm,html,pdf)
-  -t OUTPUTTYPE, --type=OUTPUTTYPE
+  -s INPUTTYPE, --typein=INPUTTYPE
+                        Force input to one of these values: (md,htm,html,pdf)
+                        autodetected by default
+  -t OUTPUTTYPE, --typeout=OUTPUTTYPE
                         Force output to one of these values: (md,htm,html,pdf)
                         autodetected by default
   -p PAGE, --page=PAGE  Page size (when applicable) (A4,Letter)
@@ -224,6 +227,16 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 &nbsp;<br />
 &nbsp;  </p>
 <hr />
+<blockquote>
+<p><strong>v1.0.1 (22/05)</strong><br />
+<em>Feature release, parameters for forcing input/output extension files</em></p>
+</blockquote>
+<ul>
+<li><strong>New features:</strong>
+    - <code>--typein</code>, <code>--typeout</code> options to avoid in/out file types detections</li>
+<li><strong>Internals:</strong>
+    - Test unit sample commands for <code>--typein</code>, <code>--typeout</code>.</li>
+</ul>
 <blockquote>
 <p><strong>v1.0.0 (22/05)</strong><br />
 <em>Stable release, runtime custom formatting plugins available</em></p>

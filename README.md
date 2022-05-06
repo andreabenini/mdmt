@@ -73,7 +73,10 @@ Options:
                         Concat *.MD list from stdin as one sigle file
   -o OUTPUTFILE, --output=OUTPUTFILE
                         Destination file name (md,htm,html,pdf)
-  -t OUTPUTTYPE, --type=OUTPUTTYPE
+  -s INPUTTYPE, --typein=INPUTTYPE
+                        Force input to one of these values: (md,htm,html,pdf)
+                        autodetected by default
+  -t OUTPUTTYPE, --typeout=OUTPUTTYPE
                         Force output to one of these values: (md,htm,html,pdf)
                         autodetected by default
   -p PAGE, --page=PAGE  Page size (when applicable) (A4,Letter)
