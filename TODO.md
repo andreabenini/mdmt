@@ -1,9 +1,3 @@
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-
 # Project TODOs
 This is not a never finished project, something has to work and something else will be added
 on upcoming releases (maybe). Here are planned features, wishlists, requirements and improvements.
@@ -11,7 +5,6 @@ Some of them might see the light in upcoming releases, few will remain here for 
 free to fund the project if you want to add your favorite feature or contribute if possible.  
 Here's current wishlist:
 
-- input might be HTML too, not just MD
 - code block color rendering. It's already working but a better formatted (and colored) output
 is preferred.
 - code block CSS support. As a programmer I usually add a lot of code blocks, basic CSS is not enough.
