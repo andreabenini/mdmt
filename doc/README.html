@@ -232,9 +232,9 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>Feature release, parameters for forcing input/output extension files</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - <code>--typein</code>, <code>--typeout</code> options to avoid in/out file types detections</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - Test unit sample commands for <code>--typein</code>, <code>--typeout</code>.</li>
 </ul>
 <blockquote>
@@ -242,10 +242,10 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>Stable release, runtime custom formatting plugins available</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - Markdown formatting plugins activation available at runtime, new parameter <code>--plugins</code>
     - <code>--plugins-help</code> option for extensive help on available plugins.</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - Testing on big files, it might take out a lot of memory but does a rather decent job.
     - Feature freeze, stability and patches releases only for a while.</li>
 </ul>
@@ -255,7 +255,7 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>minor layout cleanup and document formatting</em></p>
 </blockquote>
 <ul>
-<li><strong>New Features:</strong>
+<li><strong>New Features:</strong><br />
     - <code>text-align:justify</code> is now the default text alignment on standard (and still only) CSS theme.
     - plugin <strong>nl2br</strong> is not pleasant on HTML page rendering, CSS <code>text-align:justify</code> has been
     elected as default page justification on all text. Layout is more appealing even if rendered
@@ -266,7 +266,7 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
     - <code>README.md</code> gets automatically updated from the document generation script.
     - <strong><em>md</em></strong> and <strong><em>html</em></strong> files are now both supported as <code>--input</code> parameter but <strong>html -&gt; md</strong>
     conversion is still not yet implemented.</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - Minor error checking added to improve script reliability.
     - Input and output files are checked before dealing with them</li>
 </ul>
@@ -276,13 +276,13 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>Usable, all planned features are in place</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - Slightly optimized code generation and layout cleanup
     - Better exceptions trapping
     - CSS minor fixes, default layout is mainly oriented to GitHub look and feel
     - Providing more CSS templates for different layouts is not yet a priority but it&rsquo;s possible
     on future releases</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - HTML javascript code cleanup. Avoiding to generate static HTML pages with JS code in it,
     this really helps during PDF generation due to the fact the webkit plain rendering is good
     doesn&rsquo;t handle runtime code properly. Emoji is still there as the only exception.</li>
@@ -293,14 +293,14 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>Code cleanup</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - Added <code>--verbose</code> flag for additional output when needed.
     - mermaid code block support now added, now it&rsquo;s fully supported on HTML and PDF files
     generation.
     - Major rewrite and some code optimization.
     - Internet access is required during Mermaid blocks generation (if any), there&rsquo;s no need
     later on.</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - Code optimizations are related to a stable and usable mermaid support for PDF and HTML
     generation.
     - External mermaid service from their CDN is now used when images are generated. Raw HTML
@@ -317,9 +317,9 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>PDF proper fixes when used with webkit rendering engine</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - Major cleanup for PDF generation, reliable and based on tmp files to avoid webkit known issues</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - Fonts and formatting are left on the CSS side, need to fix it properly.
     - webkit rendering is really good but workaround must be placed to fix its errantic behavior
     when local resources are loaded from main page.
@@ -331,9 +331,9 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>HTML generation seems to be finally acceptable</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - md join from multiple files from stdin</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - Syntax fixes, python linter is now happy
     - Focusing on single pages generation multiple file joins are not yet ready for prime time
     - Working on speed and efficiency, no refactoring yet
@@ -345,13 +345,13 @@ has to be fully MarkDown compatible, no extra custom features will be added. Use
 <em>Nothing special but it works, a rather good RC1</em></p>
 </blockquote>
 <ul>
-<li><strong>New features:</strong>
+<li><strong>New features:</strong><br />
     - md -&gt; html
     - md -&gt; pdf
     - md multiple split
     - md join from multiple files
     - using python builtin markdown module and external <code>wkhtmltopdf</code> utility</li>
-<li><strong>Internals:</strong>
+<li><strong>Internals:</strong><br />
     - barebone test unit in place for multiple tests
     - software is still for personal usage, it just works, no heavy input checks or
         sanity improvements

@@ -20,19 +20,19 @@ Changelog documentation on various mdmt versions, known issues, inner working an
 > **v1.0.1 (22/05)**  
 _Feature release, parameters for forcing input/output extension files_
 
-- **New features:**
+- **New features:**  
     - `--typein`, `--typeout` options to avoid in/out file types detections
-- **Internals:**
+- **Internals:**  
     - Test unit sample commands for `--typein`, `--typeout`.
 
 
 > **v1.0.0 (22/05)**  
 _Stable release, runtime custom formatting plugins available_
 
-- **New features:**
+- **New features:**  
     - Markdown formatting plugins activation available at runtime, new parameter `--plugins`
     - `--plugins-help` option for extensive help on available plugins.
-- **Internals:**
+- **Internals:**  
     - Testing on big files, it might take out a lot of memory but does a rather decent job.
     - Feature freeze, stability and patches releases only for a while.
 
@@ -41,7 +41,7 @@ _Stable release, runtime custom formatting plugins available_
 > **v0.9.2 (22/04)**  
 _minor layout cleanup and document formatting_
 
-- **New Features:**
+- **New Features:**  
     - `text-align:justify` is now the default text alignment on standard (and still only) CSS theme.
     - plugin **nl2br** is not pleasant on HTML page rendering, CSS `text-align:justify` has been
     elected as default page justification on all text. Layout is more appealing even if rendered
@@ -52,7 +52,7 @@ _minor layout cleanup and document formatting_
     - `README.md` gets automatically updated from the document generation script.
     - ***md*** and ***html*** files are now both supported as `--input` parameter but **html -> md**
     conversion is still not yet implemented.
-- **Internals:**
+- **Internals:**  
     - Minor error checking added to improve script reliability.
     - Input and output files are checked before dealing with them
 
@@ -61,13 +61,13 @@ _minor layout cleanup and document formatting_
 > **v0.9.1 (22/04)**  
 _Usable, all planned features are in place_
 
-- **New features:**
+- **New features:**  
     - Slightly optimized code generation and layout cleanup
     - Better exceptions trapping
     - CSS minor fixes, default layout is mainly oriented to GitHub look and feel
     - Providing more CSS templates for different layouts is not yet a priority but it's possible
     on future releases
-- **Internals:**
+- **Internals:**  
     - HTML javascript code cleanup. Avoiding to generate static HTML pages with JS code in it,
     this really helps during PDF generation due to the fact the webkit plain rendering is good
     doesn't handle runtime code properly. Emoji is still there as the only exception.
@@ -77,14 +77,14 @@ _Usable, all planned features are in place_
 > **v0.9 (22/04)**  
 _Code cleanup_
 
-- **New features:**
+- **New features:**  
     - Added `--verbose` flag for additional output when needed.
     - mermaid code block support now added, now it's fully supported on HTML and PDF files
     generation.
     - Major rewrite and some code optimization.
     - Internet access is required during Mermaid blocks generation (if any), there's no need
     later on.
-- **Internals:**
+- **Internals:**  
     - Code optimizations are related to a stable and usable mermaid support for PDF and HTML
     generation.
     - External mermaid service from their CDN is now used when images are generated. Raw HTML
@@ -100,9 +100,9 @@ _Code cleanup_
 > **v0.3 (22/04)**  
 _PDF proper fixes when used with webkit rendering engine_
 
-- **New features:**
+- **New features:**  
     - Major cleanup for PDF generation, reliable and based on tmp files to avoid webkit known issues
-- **Internals:**
+- **Internals:**  
     - Fonts and formatting are left on the CSS side, need to fix it properly.
     - webkit rendering is really good but workaround must be placed to fix its errantic behavior
     when local resources are loaded from main page.
@@ -113,9 +113,9 @@ _PDF proper fixes when used with webkit rendering engine_
 > **v0.2 (22/04)**  
 _HTML generation seems to be finally acceptable_
 
-- **New features:**
+- **New features:**  
     - md join from multiple files from stdin
-- **Internals:**
+- **Internals:**  
     - Syntax fixes, python linter is now happy
     - Focusing on single pages generation multiple file joins are not yet ready for prime time
     - Working on speed and efficiency, no refactoring yet
@@ -126,13 +126,13 @@ _HTML generation seems to be finally acceptable_
 > **v0.1 (22/04)**  
 _Nothing special but it works, a rather good RC1_
 
-- **New features:**
+- **New features:**  
     - md -> html
     - md -> pdf
     - md multiple split
     - md join from multiple files
     - using python builtin markdown module and external `wkhtmltopdf` utility
-- **Internals:**
+- **Internals:**  
     - barebone test unit in place for multiple tests
     - software is still for personal usage, it just works, no heavy input checks or
         sanity improvements
