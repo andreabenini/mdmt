@@ -5,7 +5,7 @@
 #           Convert MD files to something else for easy rendering or printing
 # @author   Ben <Andrea Benini>.  Email on github website for details
 # @see      https://github.com/andreabenini/mdmt
-# @version  v1.0.0
+# @version  v1.0.2
 # @license  GPLv3
 #
 # @see      See URL for details, documentation, issues, changelog
@@ -14,15 +14,15 @@
 import re
 import os
 import sys
+import quopri
 import base64
 import shutil
 import optparse
-from click import option
 import markdown
 import requests
 
 pageFormats = ['A4', 'Letter']
-fileFormats = ['md', 'htm', 'html', 'pdf']
+fileFormats = ['md', 'htm', 'html', 'cnfdoc', 'pdf']
 md_plugins  = ['admonition', 'extra', 'legacy_attrs', 'legacy_em', 'meta', 'sane_lists', 'smarty', 'toc', 'tables', 'wikilinks']  # default plugins
 
 
@@ -83,6 +83,7 @@ class mdmtMD(_mdmtBase):
         #
         return streamBuffer
 
+    # Read plain markdown and convert it as html
     def read(self, fileName=None, plugins=[], template=None):
         try:                         # Contents                              # Options     # Plugins
             page = markdown.markdown(self.__preprocessor(fileName=fileName), tab_length=2, extensions=plugins)
@@ -110,11 +111,33 @@ class mdmtMD(_mdmtBase):
         except Exception:
             print(f"ERROR: Cannot open '{fileName}'", file=sys.stderr)
             return None
+    # Read HTML page as it is
     def readRaw(self, fileName=None):
         try:
             return super().read(fileName=fileName)
         except:
             return None
+    # Read cnfdoc file type
+    def readCNFDoc(self, fileName=None):
+        try:
+            Body = None
+            fileContents = super().read(fileName=fileName)
+            matches = re.finditer(r"(?P<Header>.*?)(?P<Body><html.*?/html>)(?P<Footer>.*)", fileContents, re.IGNORECASE | re.DOTALL)
+            page = next((x for x in matches), None) # one element only in the iterator
+            if page:
+                (Header, Body, _) = page.groups()
+                content = re.sub(r".*?Content-Transfer-Encoding:.?(?P<value>[a-zA-Z-]*]?).*", "\\g<value>", Header, 0, re.IGNORECASE|re.DOTALL)
+                if content:
+                    if content.lower()=='quoted-printable':
+                        Body = quopri.decodestring(Body).decode('latin-1')      # Win? wtf... utf-8 direct conversion might raise errors (cp125x sucks)
+                        Body = str(Body.encode('utf-8'), 'utf-8')               # byte -> str
+                    else:
+                        raise TypeError('Unknown content type in file')
+            return Body
+
+        except Exception as e:
+            print(f"ERROR: {str(e)}", file=sys.stderr)
+        return None
 
 class mdmtHTML(_mdmtBase):
     def __init__(self, verbose=False):
@@ -177,6 +200,8 @@ class mdmt:
             streamBuffer = fileInput.read(fileName=self.__input, template=self.__template, plugins=self.__plugins)
         elif self.__inputExt == 'html' or self.__inputExt == 'htm':     # .html .htm
             streamBuffer = fileInput.readRaw(fileName=self.__input)
+        elif self.__inputExt == 'cnfdoc':                               # .cnfdoc
+            streamBuffer = fileInput.readCNFDoc(fileName=self.__input)
         else:
             print(f"ERROR: Input file extension '{self.__inputExt}' not supported", file=sys.stderr)
             return 1
@@ -211,9 +236,9 @@ class mdmt:
             return
         # Detecting input file format
         allowedInputExts = fileFormats.copy()
-        allowedInputExts.pop()
+        allowedInputExts.pop()      # XXX: PDF not yet allowed as input format
         if self.__inputExt not in allowedInputExts:
-            print("ERROR: Invalid input format", file=sys.stderr)
+            print(f"ERROR: Invalid input format ({self.__inputExt})", file=sys.stderr)
             self.__valid = False
             return
         # html->md conversion is in the todo list
@@ -395,6 +420,8 @@ if __name__ == '__main__':
     returnCode = 1
     if not os.path.isabs(options.template):     # Calculate abs path for template file class
         templateFile = os.path.abspath(os.getcwd()) + os.path.sep + options.template
+    else:
+        templateFile = options.template
     converter = mdmt(verbose=options.verbose, template=templateFile, pageSize=options.page, header=options.header, plugins=options.plugins,
                      inputFile=inputFile, inputType=options.inputType, outputFile=options.outputFile)
     if options.header:                          # Split file by headers

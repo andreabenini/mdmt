@@ -72,13 +72,13 @@ Options:
   -l INPUTLIST, --input-list=INPUTLIST
                         Concat *.MD list from stdin as one sigle file
   -o OUTPUTFILE, --output=OUTPUTFILE
-                        Destination file name (md,htm,html,pdf)
+                        Destination file name (md,htm,html,cnfdoc,pdf)
   -s INPUTTYPE, --typein=INPUTTYPE
-                        Force input to one of these values: (md,htm,html,pdf)
-                        autodetected by default
+                        Force input to one of these values:
+                        (md,htm,html,cnfdoc,pdf) autodetected by default
   -t OUTPUTTYPE, --typeout=OUTPUTTYPE
-                        Force output to one of these values: (md,htm,html,pdf)
-                        autodetected by default
+                        Force output to one of these values:
+                        (md,htm,html,cnfdoc,pdf) autodetected by default
   -p PAGE, --page=PAGE  Page size (when applicable) (A4,Letter)
   -T TEMPLATE, --template=TEMPLATE
                         CSS template to apply, default: mdmt.css

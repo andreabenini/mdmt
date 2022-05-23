@@ -17,6 +17,15 @@ Changelog documentation on various mdmt versions, known issues, inner working an
 
 
 ---
+> **v1.0.2 (22/05)**  
+_Bugfix and new features tests_
+
+- **New features:**  
+    - Testing new features for confluence docs, not yet ready for the prime time
+- **Bugfix:**  
+    - Template path might be absolute or a relative path.
+
+
 > **v1.0.1 (22/05)**  
 _Feature release, parameters for forcing input/output extension files_
 
