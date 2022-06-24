@@ -231,7 +231,7 @@ class mdmt:
         else:
             self.__outputExt = fileFormat
         if self.__outputExt not in fileFormats:
-            print("ERROR: Invalid output format", file=sys.stderr)
+            print(f"ERROR: Invalid output format ({self.__outputExt})", file=sys.stderr)
             self.__valid = False
             return
         # Detecting input file format
