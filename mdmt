@@ -236,7 +236,7 @@ class mdmt:
             return
         # Detecting input file format
         allowedInputExts = fileFormats.copy()
-        allowedInputExts.pop()      # XXX: PDF not yet allowed as input format
+        allowedInputExts.pop()      # TODO: PDF not yet allowed as input format
         if self.__inputExt not in allowedInputExts:
             print(f"ERROR: Invalid input format ({self.__inputExt})", file=sys.stderr)
             self.__valid = False
