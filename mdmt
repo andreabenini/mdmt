@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# MDMT  -   MarkDown Multi Tool
+# MDMT      MarkDown Multi Tool
 #           Convert MD files to something else for easy rendering or printing
 # @author   Ben <Andrea Benini>.  Email on github website for details
 # @see      https://github.com/andreabenini/mdmt
@@ -87,6 +87,7 @@ class mdmtMD(_mdmtBase):
     def read(self, fileName=None, plugins=[], template=None):
         try:                         # Contents                              # Options     # Plugins
             page = markdown.markdown(self.__preprocessor(fileName=fileName), tab_length=2, extensions=plugins)
+            # TODO: [page]. Special rendering needed for ``` comments and syntax code coloring. Required syntax: ```python, ```sh, ```sql, ```json, ```yaml
             if self.readRaw(fileName=template):
                 cssTemplate = f"<link rel='stylesheet' href='{template}'>"   # Workaround for wkhtmltopdf bug on relative paths
             else:
